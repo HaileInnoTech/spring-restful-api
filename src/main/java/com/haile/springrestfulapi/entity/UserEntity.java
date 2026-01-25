@@ -1,0 +1,43 @@
+package com.haile.springrestfulapi.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @NotBlank(message = "Username không được để trống")
+    private String username;
+
+    @NotBlank(message = "Email không được để trống")
+    @Column(unique = true)
+    private String email;
+
+    private String address;
+    @NotBlank(message = "Password không được để trống")
+    private String password;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id")
+    private RoleEntity role;
+
+    @OneToMany(mappedBy = "user")
+    private List<PostEntity> posts;
+
+    @OneToMany(mappedBy = "user")
+    private List<CommentEntity> comments;
+}

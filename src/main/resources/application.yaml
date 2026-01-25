@@ -1,0 +1,23 @@
+profiles:
+  active: dev
+server:
+  port: 8080
+
+spring:
+  application:
+    name: spring-restful-api
+
+
+  jpa:
+    database: mysql
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring_restful_api
+    username: root
+    password: mypassword
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
