@@ -22,7 +22,10 @@ public class RoleController {
     }
 
     @GetMapping("/roles")
-    public ResponseEntity<ApiResponse<Page<RoleEntity>>> getAllRoles(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size, @RequestParam(defaultValue = "id") String sort, @RequestParam(defaultValue = "asc") String direction) {
+    public ResponseEntity<ApiResponse<Page<RoleEntity>>> getAllRoles(@RequestParam(required = false) Integer page,
+                                                                     @RequestParam(required = false) Integer size,
+                                                                     @RequestParam(defaultValue = "id") String sort,
+                                                                     @RequestParam(defaultValue = "asc") String direction) {
         Sort.Direction sortDirection = Sort.Direction.fromString(direction);
 
         if (page == null || size == null) {
@@ -43,7 +46,8 @@ public class RoleController {
     }
 
     @PutMapping("/roles/{id}")
-    public ResponseEntity<ApiResponse<String>> updateRole(@PathVariable Long id, @Valid @RequestBody RoleEntity newRole) {
+    public ResponseEntity<ApiResponse<String>> updateRole(@PathVariable Long id,
+                                                          @Valid @RequestBody RoleEntity newRole) {
         newRole.setId(id);
         this.roleService.updateRole(newRole);
         return ApiResponse.success("Update successful");

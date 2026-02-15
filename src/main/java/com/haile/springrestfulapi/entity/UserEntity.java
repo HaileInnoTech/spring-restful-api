@@ -16,10 +16,8 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class UserEntity extends BaseEntity {
+
     @NotBlank(message = "Username không được để trống")
     private String username;
 
@@ -37,6 +35,9 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user")
     private List<PostEntity> posts;
+
+    @OneToMany(mappedBy = "user")
+    private List<RefreshTokenEntity> refresh_tokens;
 
     @OneToMany(mappedBy = "user")
     private List<CommentEntity> comments;

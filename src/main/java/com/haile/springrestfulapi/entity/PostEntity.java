@@ -3,7 +3,6 @@ package com.haile.springrestfulapi.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -13,17 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PostEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class PostEntity extends BaseEntity {
 
     private String title;
     private String content;
-
-    private Instant createAt;
-
-    private Instant updateAt;
 
     // foreign key
     @ManyToOne(fetch = FetchType.LAZY)

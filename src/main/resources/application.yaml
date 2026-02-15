@@ -1,5 +1,3 @@
-profiles:
-  active: dev
 server:
   port: 8080
 
@@ -15,9 +13,19 @@ spring:
       ddl-auto: update
 
   datasource:
-    url: jdbc:mysql://localhost:3306/spring_restful_api
-    username: root
-    password: mypassword
+    url: jdbc:mysql://10.32.66.1:3306/spring_restful_api
+    username: admin
+    password: admin
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+custom:
+  jwt:
+    access-token:
+      base64-secret: +jqkXG1TXntZHehg1GUQBRTwiqxRkU3Qq7moJQbmjuI=
+      validity-in-seconds: 86400
+    refresh-token:
+      validity-in-seconds: 8640000
+
+
 
 

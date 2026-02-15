@@ -4,28 +4,27 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.Instant;
+
 @Entity
-@Table(name = "comments")
+@Table(name = "refresh_tokens")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CommentEntity extends BaseEntity {
-    @NotBlank(message = "Content không được để trống")
-    private String content;
+public class RefreshTokenEntity extends BaseEntity {
 
-    private boolean isApproved = false;
+    @NotNull(message = "Token must not be null")
+    private String token;
 
+    private Instant expiredAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private PostEntity post;
 }

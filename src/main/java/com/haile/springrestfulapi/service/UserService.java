@@ -68,9 +68,12 @@ public class UserService {
 
         newUser.setPassword(hashedPassword);
 
-        Long roleId = newUser.getRole().getId();
-        String roleName = newUser.getRole().getName();
-        RoleEntity roleEntity = roleRepository.findAllByIdOrName(roleId, roleName).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+        Long roleId = newUser.getRole()
+                .getId();
+        String roleName = newUser.getRole()
+                .getName();
+        RoleEntity roleEntity = roleRepository.findAllByIdOrName(roleId, roleName)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
         newUser.setRole(roleEntity);
 
         return convertToUserResponseDTO(userRepository.save(newUser));
@@ -88,7 +91,8 @@ public class UserService {
         return this.convertToUserResponseDTO(userRepository.findAll(sort));
     }
 
-    public List<UserResponseDTO> getAllUsers(String role, Sort sort) {
+    public List<UserResponseDTO> getAllUsers(String role,
+                                             Sort sort) {
         return this.convertToUserResponseDTO(userRepository.findByRole_Name(role, sort));
     }
 
@@ -102,7 +106,8 @@ public class UserService {
         return this.convertToUserResponseDTO(userRepository.findAll(pageable));
     }
 
-    public Page<UserResponseDTO> getAllUsers(String role, Pageable pageable) {
+    public Page<UserResponseDTO> getAllUsers(String role,
+                                             Pageable pageable) {
         return this.convertToUserResponseDTO(userRepository.findByRole_Name(role, pageable));
     }
 
@@ -113,7 +118,8 @@ public class UserService {
                 );
     }
 
-    public void updateUser(Long id, UserRequestDTO user) {
+    public void updateUser(Long id,
+                           UserRequestDTO user) {
         UserEntity entity = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
 
@@ -127,5 +133,10 @@ public class UserService {
 
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public UserEntity findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email " + email));
     }
 }

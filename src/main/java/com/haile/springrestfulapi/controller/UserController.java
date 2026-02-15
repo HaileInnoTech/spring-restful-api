@@ -33,13 +33,12 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<Page<UserResponseDTO>>> getAllUsers(
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size,
-            @RequestParam(defaultValue = "id") String sort,
-            @RequestParam(defaultValue = "asc") String direction,
-            @RequestParam(required = false) String role
-    ) {
+    public ResponseEntity<ApiResponse<Page<UserResponseDTO>>> getAllUsers(@RequestParam(required = false) Integer page,
+                                                                          @RequestParam(required = false) Integer size,
+                                                                          @RequestParam(defaultValue = "id") String sort,
+                                                                          @RequestParam(defaultValue = "asc") String direction,
+                                                                          @RequestParam(required = false) String role) {
+
         Sort.Direction sortDirection = Sort.Direction.fromString(direction);
 
         if (page == null || size == null) {
@@ -72,7 +71,8 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<ApiResponse<String>> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDTO updateUser) {
+    public ResponseEntity<ApiResponse<String>> updateUser(@PathVariable Long id,
+                                                          @Valid @RequestBody UserRequestDTO updateUser) {
         this.userService.updateUser(id, updateUser);
         return ApiResponse.success("Update successful");
 

@@ -5,6 +5,7 @@ import com.haile.springrestfulapi.entity.TagEntity;
 import com.haile.springrestfulapi.entity.UserEntity;
 import com.haile.springrestfulapi.entity.dto.request.PostRequestDTO;
 import com.haile.springrestfulapi.entity.dto.response.PostResponseDTO;
+import com.haile.springrestfulapi.helper.SecurityUtil;
 import com.haile.springrestfulapi.helper.exception.ResourceNotFoundException;
 import com.haile.springrestfulapi.repository.PostRepository;
 import com.haile.springrestfulapi.repository.TagRepository;
@@ -35,7 +36,8 @@ public class PostService {
         List<PostResponseDTO.OutputTag> tags =
                 post.getTags() == null
                         ? List.of()
-                        : post.getTags().stream()
+                        : post.getTags()
+                        .stream()
                         .map(tag -> new PostResponseDTO.OutputTag(
                                 tag.getId(),
                                 tag.getName()
@@ -69,17 +71,22 @@ public class PostService {
 
     public PostResponseDTO createNewPost(PostRequestDTO dto) {
 
+        Long u = SecurityUtil.getCurrentIdLogin()
+                .get();
         // 1. Lấy user từ DB
-        UserEntity user = userRepository.findById(dto.getUser().getId())
+        UserEntity user = userRepository.findById(u)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found with id = " + dto.getUser().getId())
+                        new ResourceNotFoundException("User not found with id = " + dto.getUser()
+                                .getId())
                 );
+
 
         // 2. Lấy tags từ DB
         List<TagEntity> tags = dto.getTags() == null
                 ? List.of()
                 : tagRepository.findAllById(
-                dto.getTags().stream()
+                dto.getTags()
+                        .stream()
                         .map(PostRequestDTO.InputTag::getId)
                         .toList()
         );
@@ -93,8 +100,10 @@ public class PostService {
 
 
     public List<PostResponseDTO> getAllPosts(Sort sort) {
-        return postRepository.findAll(sort).stream()
-                .map(this::convertPostToDto).collect(Collectors.toList());
+        return postRepository.findAll(sort)
+                .stream()
+                .map(this::convertPostToDto)
+                .collect(Collectors.toList());
     }
 
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
