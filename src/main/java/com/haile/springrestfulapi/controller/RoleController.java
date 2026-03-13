@@ -3,6 +3,7 @@ package com.haile.springrestfulapi.controller;
 import com.haile.springrestfulapi.entity.RoleEntity;
 import com.haile.springrestfulapi.helper.ApiResponse;
 import com.haile.springrestfulapi.service.RoleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -10,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+@Tag(name = "Role", description = "APIs for role")
 
 @RestController
 public class RoleController {

@@ -2,17 +2,22 @@ package com.haile.springrestfulapi.controller;
 
 
 import com.haile.springrestfulapi.entity.UserEntity;
+import com.haile.springrestfulapi.entity.dto.request.UserFilterRequestDTO;
 import com.haile.springrestfulapi.entity.dto.request.UserRequestDTO;
 import com.haile.springrestfulapi.entity.dto.response.UserResponseDTO;
 import com.haile.springrestfulapi.helper.ApiResponse;
 import com.haile.springrestfulapi.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+@Tag(name = "User", description = "APIs for user")
 
 @RestController
 public class UserController {
@@ -32,37 +37,46 @@ public class UserController {
         return ApiResponse.created(user);
     }
 
+    // no filter get all users
+    //    @GetMapping("/users")
+    //    public ResponseEntity<ApiResponse<Page<UserResponseDTO>>> getAllUsers(@RequestParam(required = false) Integer page,
+    //                                                                          @RequestParam(required = false) Integer size,
+    //                                                                          @RequestParam(defaultValue = "id") String sort,
+    //                                                                          @RequestParam(defaultValue = "asc") String direction,
+    //                                                                          @RequestParam(required = false) String role) {
+    //
+    //        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+    //
+    //        if (page == null || size == null) {
+    //            List<UserResponseDTO> users;
+    //
+    //            if (role == null) {
+    //                users = userService.getAllUsers(Sort.by(sortDirection, sort));
+    //            } else {
+    //                users = userService.getAllUsers(role, Sort.by(sortDirection, sort));
+    //            }
+    //
+    //            return ApiResponse.success(new PageImpl<>(users));
+    //        }
+    //
+    //        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
+    //        Page<UserResponseDTO> users;
+    //        if (role == null) {
+    //            users = userService.getAllUsers(pageable);
+    //        } else {
+    //            users = userService.getAllUsers(role, pageable);
+    //        }
+    //
+    //        return ApiResponse.success(users);
+    //
+    //    }
+
+    // use filter for get all users
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<Page<UserResponseDTO>>> getAllUsers(@RequestParam(required = false) Integer page,
-                                                                          @RequestParam(required = false) Integer size,
-                                                                          @RequestParam(defaultValue = "id") String sort,
-                                                                          @RequestParam(defaultValue = "asc") String direction,
-                                                                          @RequestParam(required = false) String role) {
-
-        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
-
-        if (page == null || size == null) {
-            List<UserResponseDTO> users;
-
-            if (role == null) {
-                users = userService.getAllUsers(Sort.by(sortDirection, sort));
-            } else {
-                users = userService.getAllUsers(role, Sort.by(sortDirection, sort));
-            }
-
-            return ApiResponse.success(new PageImpl<>(users));
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
-        Page<UserResponseDTO> users;
-        if (role == null) {
-            users = userService.getAllUsers(pageable);
-        } else {
-            users = userService.getAllUsers(role, pageable);
-        }
-
+    public ResponseEntity<ApiResponse<Page<UserResponseDTO>>> getAllUsers(@ParameterObject UserFilterRequestDTO userFilter,
+                                                                          @ParameterObject Pageable pageable) {
+        Page<UserResponseDTO> users = userService.getAllUsers(pageable, userFilter);
         return ApiResponse.success(users);
-
     }
 
     @GetMapping("/users/{id}")

@@ -2,6 +2,7 @@ package com.haile.springrestfulapi.service;
 
 import com.haile.springrestfulapi.entity.RoleEntity;
 import com.haile.springrestfulapi.entity.UserEntity;
+import com.haile.springrestfulapi.entity.dto.request.UserFilterRequestDTO;
 import com.haile.springrestfulapi.entity.dto.request.UserRequestDTO;
 import com.haile.springrestfulapi.entity.dto.response.RoleResponseDTO;
 import com.haile.springrestfulapi.entity.dto.response.UserResponseDTO;
@@ -9,11 +10,13 @@ import com.haile.springrestfulapi.helper.exception.ResourceAlreadyExistsExceptio
 import com.haile.springrestfulapi.helper.exception.ResourceNotFoundException;
 import com.haile.springrestfulapi.repository.RoleRepository;
 import com.haile.springrestfulapi.repository.UserRepository;
+import com.haile.springrestfulapi.service.specification.UserSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,31 +34,30 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public RoleResponseDTO convertToRoleResponseDTO(RoleEntity role) {
-        return RoleResponseDTO
-                .builder()
-                .id(role.getId())
-                .name(role.getName())
-                .description(role.getDescription())
-                .build();
+        return RoleResponseDTO.builder()
+                              .id(role.getId())
+                              .name(role.getName())
+                              .description(role.getDescription())
+                              .build();
     }
 
     public UserResponseDTO convertToUserResponseDTO(UserEntity userEntity) {
-//        UserResponseDTO dto = new UserResponseDTO();
-//
-//        dto.setId(userEntity.getId());
-//        dto.setUsername(userEntity.getUsername());
-//        dto.setEmail(userEntity.getEmail());
-//        dto.setAddress(userEntity.getAddress());
-//        dto.setRole(userEntity.getRole());
-//
-//        return dto;
+        //        UserResponseDTO dto = new UserResponseDTO();
+        //
+        //        dto.setId(userEntity.getId());
+        //        dto.setUsername(userEntity.getUsername());
+        //        dto.setEmail(userEntity.getEmail());
+        //        dto.setAddress(userEntity.getAddress());
+        //        dto.setRole(userEntity.getRole());
+        //
+        //        return dto;
         return UserResponseDTO.builder()
-                .id(userEntity.getId())
-                .username(userEntity.getUsername())
-                .email(userEntity.getEmail())
-                .address(userEntity.getAddress())
-                .role(convertToRoleResponseDTO(userEntity.getRole()))
-                .build();
+                              .id(userEntity.getId())
+                              .username(userEntity.getUsername())
+                              .email(userEntity.getEmail())
+                              .address(userEntity.getAddress())
+                              .role(convertToRoleResponseDTO(userEntity.getRole()))
+                              .build();
     }
 
     public UserResponseDTO createNewUser(UserEntity newUser) {
@@ -69,59 +71,59 @@ public class UserService {
         newUser.setPassword(hashedPassword);
 
         Long roleId = newUser.getRole()
-                .getId();
+                             .getId();
         String roleName = newUser.getRole()
-                .getName();
+                                 .getName();
         RoleEntity roleEntity = roleRepository.findAllByIdOrName(roleId, roleName)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+                                              .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
         newUser.setRole(roleEntity);
 
         return convertToUserResponseDTO(userRepository.save(newUser));
     }
 
-
     // Không phân trang
     public List<UserResponseDTO> convertToUserResponseDTO(List<UserEntity> users) {
         return users.stream()
-                .map(this::convertToUserResponseDTO)
-                .toList();
+                    .map(this::convertToUserResponseDTO)
+                    .toList();
     }
 
     public List<UserResponseDTO> getAllUsers(Sort sort) {
         return this.convertToUserResponseDTO(userRepository.findAll(sort));
     }
 
-    public List<UserResponseDTO> getAllUsers(String role,
-                                             Sort sort) {
+    public List<UserResponseDTO> getAllUsers(String role, Sort sort) {
         return this.convertToUserResponseDTO(userRepository.findByRole_Name(role, sort));
     }
-
 
     // Có phân trang
     public Page<UserResponseDTO> convertToUserResponseDTO(Page<UserEntity> page) {
         return page.map(this::convertToUserResponseDTO);
     }
 
-    public Page<UserResponseDTO> getAllUsers(Pageable pageable) {
-        return this.convertToUserResponseDTO(userRepository.findAll(pageable));
+    // use specification
+    public Page<UserResponseDTO> getAllUsers(Pageable pageable, UserFilterRequestDTO userFilter) {
+
+        Specification<UserEntity> specs = Specification.allOf(UserSpecification.hasName(userFilter),
+                                                              UserSpecification.hasEmail(userFilter),
+                                                              UserSpecification.hasAddress(userFilter),
+                                                              UserSpecification.hasRole(userFilter));
+
+        return this.convertToUserResponseDTO(userRepository.findAll(specs, pageable));
     }
 
-    public Page<UserResponseDTO> getAllUsers(String role,
-                                             Pageable pageable) {
+    public Page<UserResponseDTO> getAllUsers(String role, Pageable pageable) {
         return this.convertToUserResponseDTO(userRepository.findByRole_Name(role, pageable));
     }
 
     public UserEntity getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("User not found with id = " + id)
-                );
+                             .orElseThrow(() -> new EntityNotFoundException("User not found with id = " + id));
     }
 
-    public void updateUser(Long id,
-                           UserRequestDTO user) {
+    public void updateUser(Long id, UserRequestDTO user) {
         UserEntity entity = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
+                                          .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
 
         entity.setUsername(user.getUsername());
         entity.setEmail(user.getEmail());
@@ -130,13 +132,12 @@ public class UserService {
         userRepository.save(entity);
     }
 
-
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
     }
 
     public UserEntity findUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email " + email));
+                             .orElseThrow(() -> new ResourceNotFoundException("User not found with email " + email));
     }
 }

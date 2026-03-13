@@ -33,63 +33,49 @@ public class PostService {
 
     public PostResponseDTO convertPostToDto(PostEntity post) {
 
-        List<PostResponseDTO.OutputTag> tags =
-                post.getTags() == null
-                        ? List.of()
-                        : post.getTags()
-                        .stream()
-                        .map(tag -> new PostResponseDTO.OutputTag(
-                                tag.getId(),
-                                tag.getName()
-                        ))
-                        .toList();
+        List<PostResponseDTO.OutputTag> tags = post.getTags() == null ? List.of() : post.getTags()
+                                                                                        .stream()
+                                                                                        .map(tag -> new PostResponseDTO.OutputTag(
+                                                                                                tag.getId(),
+                                                                                                tag.getName()))
+                                                                                        .toList();
 
         return PostResponseDTO.builder()
-                .id(post.getId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .tags(tags)
-                .build();
+                              .id(post.getId())
+                              .title(post.getTitle())
+                              .content(post.getContent())
+                              .tags(tags)
+                              .build();
     }
 
     /* =========================
        PostRequestDTO -> PostEntity
        ========================= */
-    public PostEntity convertDtoToPost(
-            PostRequestDTO dto,
-            UserEntity user,
-            List<TagEntity> tags
-    ) {
+    public PostEntity convertDtoToPost(PostRequestDTO dto, UserEntity user, List<TagEntity> tags) {
 
         return PostEntity.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .user(user)
-                .tags(tags)
-                .build();
+                         .title(dto.getTitle())
+                         .content(dto.getContent())
+                         .user(user)
+                         .tags(tags)
+                         .build();
     }
 
     public PostResponseDTO createNewPost(PostRequestDTO dto) {
 
         Long u = SecurityUtil.getCurrentIdLogin()
-                .get();
+                             .get();
         // 1. Lấy user từ DB
         UserEntity user = userRepository.findById(u)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found with id = " + dto.getUser()
-                                .getId())
-                );
+                                        .orElseThrow(() -> new ResourceNotFoundException("User not found with id = " + dto.getUser()
+                                                                                                                          .getId()));
 
 
         // 2. Lấy tags từ DB
-        List<TagEntity> tags = dto.getTags() == null
-                ? List.of()
-                : tagRepository.findAllById(
-                dto.getTags()
-                        .stream()
-                        .map(PostRequestDTO.InputTag::getId)
-                        .toList()
-        );
+        List<TagEntity> tags = dto.getTags() == null ? List.of() : tagRepository.findAllById(dto.getTags()
+                                                                                                .stream()
+                                                                                                .map(PostRequestDTO.InputTag::getId)
+                                                                                                .toList());
 
         PostEntity postEntity = convertDtoToPost(dto, user, tags);
 
@@ -101,21 +87,21 @@ public class PostService {
 
     public List<PostResponseDTO> getAllPosts(Sort sort) {
         return postRepository.findAll(sort)
-                .stream()
-                .map(this::convertPostToDto)
-                .collect(Collectors.toList());
+                             .stream()
+                             .map(this::convertPostToDto)
+                             .collect(Collectors.toList());
     }
 
     public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
         return postRepository.findAll(pageable)
-                .map(this::convertPostToDto);
+                             .map(this::convertPostToDto);
     }
 
 
     //delete Post
     public void deletePost(Long id) {
         PostEntity post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id = " + id));
+                                        .orElseThrow(() -> new ResourceNotFoundException("Post not found with id = " + id));
         postRepository.delete(post);
     }
 

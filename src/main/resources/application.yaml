@@ -1,14 +1,14 @@
-server:
-  port: 8080
-
 spring:
+  profiles:
+    active: dev
+
   application:
     name: spring-restful-api
 
 
+
   jpa:
     database: mysql
-    show-sql: true
     hibernate:
       ddl-auto: update
 
@@ -26,6 +26,8 @@ custom:
     refresh-token:
       validity-in-seconds: 8640000
 
+springdoc:
+  swagger-ui:
+    defaultModelsExpandDepth: 0
 
-
-
+spring-boot-log: spring-boot-logs

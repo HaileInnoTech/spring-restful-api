@@ -3,6 +3,7 @@ package com.haile.springrestfulapi.controller;
 import com.haile.springrestfulapi.entity.TagEntity;
 import com.haile.springrestfulapi.helper.ApiResponse;
 import com.haile.springrestfulapi.service.TagService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Tag", description = "APIs for tag")
 @RestController()
 public class TagController {
     @Autowired
@@ -22,7 +24,10 @@ public class TagController {
     }
 
     @GetMapping("/tags")
-    public ResponseEntity<ApiResponse<Page<TagEntity>>> getAllTags(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size, @RequestParam(defaultValue = "id") String sort, @RequestParam(defaultValue = "asc") String direction) {
+    public ResponseEntity<ApiResponse<Page<TagEntity>>> getAllTags(@RequestParam(required = false) Integer page,
+                                                                   @RequestParam(required = false) Integer size,
+                                                                   @RequestParam(defaultValue = "id") String sort,
+                                                                   @RequestParam(defaultValue = "asc") String direction) {
         Sort.Direction sortDirection = Sort.Direction.fromString(direction);
 
         if (page == null || size == null) {

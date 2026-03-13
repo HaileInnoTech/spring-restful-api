@@ -32,7 +32,7 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableMethodSecurity
 public class SecurityConfig {
     //gán biến trong properties.yaml
-    @Value("${custom.jwt.access-token.base64-secret}")
+    @Value(value = "${custom.jwt.access-token.base64-secret}")
     String jwtKey;
 
 
@@ -50,8 +50,8 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withSecretKey(getSecretKey())
-                .macAlgorithm(MacAlgorithm.HS256)
-                .build();
+                               .macAlgorithm(MacAlgorithm.HS256)
+                               .build();
     }
 
 
@@ -68,7 +68,7 @@ public class SecurityConfig {
 
     private SecretKey getSecretKey() {
         byte[] keyBytes = Base64.from(jwtKey)
-                .decode();
+                                .decode();
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, JwtService.JWT_ALGORITHM.getName());
     }
 
@@ -91,8 +91,9 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http,
                                                    CustomAccessDeniedHandler customAccessDeniedHandler,
-                                                   CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
-
+                                                   CustomAuthenticationEntryPoint customAuthenticationEntryPoint)
+            throws Exception {
+        final String[] WHITE_LISTS = {"/auth/login", "/auth/refresh", "/auth/refresh-with-cookie", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/auth/register"};
         http.csrf(c -> c.disable());
 
         http.formLogin(form -> form.disable());
@@ -100,24 +101,21 @@ public class SecurityConfig {
         http.sessionManagement(s -> s.disable());
 
 
-        http.authorizeHttpRequests(
-                requests -> requests.requestMatchers("/auth/login", "/auth/refresh", "/auth/refresh-with-cookie")
-                        .permitAll()
-                        .requestMatchers("/users/**")
-                        .hasRole("user")
-                        .anyRequest()
-                        .authenticated()
+        http.authorizeHttpRequests(requests -> requests.requestMatchers(WHITE_LISTS)
+                                                       .permitAll()
+                                                       .requestMatchers("/users/**")
+                                                       .hasRole("user")
+                                                       .anyRequest()
+                                                       .authenticated()
 
-        );
+                                  );
 
-        http.oauth2ResourceServer(oauth2 -> oauth2
-                .accessDeniedHandler(customAccessDeniedHandler)
-                .authenticationEntryPoint(customAuthenticationEntryPoint)
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        http.oauth2ResourceServer(oauth2 -> oauth2.accessDeniedHandler(customAccessDeniedHandler)
+                                                  .authenticationEntryPoint(customAuthenticationEntryPoint)
+                                                  .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
 
         return http.build();
     }
-
 
 }

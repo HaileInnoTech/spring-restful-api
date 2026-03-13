@@ -39,13 +39,15 @@ public class ApiResponse<T> {
     // 3. Created: Trả về HTTP 201 Created (Dùng cho tạo mới)
     public static <T> ResponseEntity<ApiResponse<T>> created(T data) {
         ApiResponse<T> response = new ApiResponse<>(HttpStatus.CREATED, "Created successfully", data, null);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                             .body(response);
     }
 
     // 4. Error: Trả về HTTP Status tùy chỉnh (400, 404, 500...) + Error Code
     public static <T> ResponseEntity<ApiResponse<T>> error(HttpStatus status, String message, String errorCode) {
         ApiResponse<T> response = new ApiResponse<>(status, message, null, errorCode);
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.status(status)
+                             .body(response);
     }
 
     // 5. Error cơ bản: Chỉ cần Status và Message

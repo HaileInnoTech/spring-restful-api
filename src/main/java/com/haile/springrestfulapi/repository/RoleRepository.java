@@ -18,4 +18,6 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     Boolean existsByNameAndIdNot(String name, Long id);
 
     Optional<RoleEntity> findAllByIdOrName(Long id, String name);
+
+    String findAByIdOrName(Long id, String name);
 }

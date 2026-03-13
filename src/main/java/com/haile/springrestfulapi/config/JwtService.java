@@ -40,17 +40,16 @@ public class JwtService {
 
     private final RefreshTokenService refreshTokenService;
 
-    public String jwtCreateAccessToken(Authentication authentication,
-                                       Long userId) {
+    public String jwtCreateAccessToken(Authentication authentication, Long userId) {
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
 
         // ghép các quyền thành 1 string: "ROLE_USER ROLE_ADMIN"
         String scope = authentication.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .filter(a -> !a.startsWith("FACTOR_"))
-                .collect(Collectors.joining(" "));
+                                     .stream()
+                                     .map(GrantedAuthority::getAuthority)
+                                     .filter(a -> !a.startsWith("FACTOR_"))
+                                     .collect(Collectors.joining(" "));
 
 
         // @formatter:off

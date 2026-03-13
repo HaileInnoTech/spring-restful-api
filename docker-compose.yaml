@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+  spring-app:
+    build: .
+    container_name: spring_restful_api
+    restart: always
+    ports:
+      - "8080:8080"

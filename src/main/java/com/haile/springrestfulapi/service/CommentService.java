@@ -24,44 +24,46 @@ public class CommentService {
 
     public CommentResponseDTO convertToDto(CommentEntity comment) {
         CommentResponseDTO.OutputUser user = new CommentResponseDTO.OutputUser(comment.getUser()
-                .getId(), comment.getUser()
-                .getUsername());
+                                                                                      .getId(),
+                                                                               comment.getUser()
+                                                                                      .getUsername());
 
         CommentResponseDTO.OutputPost post = new CommentResponseDTO.OutputPost(comment.getPost()
-                .getId(), comment.getPost()
-                .getTitle(), comment.getPost()
-                .getContent());
+                                                                                      .getId(),
+                                                                               comment.getPost()
+                                                                                      .getTitle(),
+                                                                               comment.getPost()
+                                                                                      .getContent());
 
         return CommentResponseDTO.builder()
-                .id(comment.getId())
-                .content(comment.getContent())
-                .isApproved(comment.isApproved())
-                .createdAt(comment.getCreatedAt())
-                .updatedAt(comment.getUpdatedAt())
-                .user(user)
-                .post(post)
-                .build();
+                                 .id(comment.getId())
+                                 .content(comment.getContent())
+                                 .isApproved(comment.isApproved())
+                                 .createdAt(comment.getCreatedAt())
+                                 .updatedAt(comment.getUpdatedAt())
+                                 .user(user)
+                                 .post(post)
+                                 .build();
 
     }
 
     public CommentEntity convertToEntity(CommentRequestDTO comment) {
         UserEntity user = userRepository.findById(comment.getUser()
-                        .getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User with id  " + comment.getUser()
-                        .getId() + " not found"));
+                                                         .getId())
+                                        .orElseThrow(() -> new ResourceNotFoundException("User with id  " + comment.getUser()
+                                                                                                                   .getId() + " not found"));
 
         PostEntity post = postRepository.findById(comment.getPost()
-                        .getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Post with id  " + comment.getPost()
-                        .getId() + " not found"));
+                                                         .getId())
+                                        .orElseThrow(() -> new ResourceNotFoundException("Post with id  " + comment.getPost()
+                                                                                                                   .getId() + " not found"));
 
-        return CommentEntity
-                .builder()
-                .content(comment.getContent())
-                .isApproved(comment.isApproved())
-                .user(user)
-                .post(post)
-                .build();
+        return CommentEntity.builder()
+                            .content(comment.getContent())
+                            .isApproved(comment.isApproved())
+                            .user(user)
+                            .post(post)
+                            .build();
     }
 
     public CommentResponseDTO createNewComment(CommentRequestDTO comment) {

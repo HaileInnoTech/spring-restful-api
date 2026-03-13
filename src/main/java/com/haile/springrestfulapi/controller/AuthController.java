@@ -1,11 +1,14 @@
 package com.haile.springrestfulapi.controller;
 
 import com.haile.springrestfulapi.config.JwtService;
+import com.haile.springrestfulapi.entity.UserEntity;
 import com.haile.springrestfulapi.entity.dto.request.LoginRequestDTO;
+import com.haile.springrestfulapi.entity.dto.request.RegisterRequestDTO;
 import com.haile.springrestfulapi.entity.dto.response.ExchangeTokenResponseDTO;
 import com.haile.springrestfulapi.entity.dto.response.LoginResponseDTO;
 import com.haile.springrestfulapi.helper.ApiResponse;
 import com.haile.springrestfulapi.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +18,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Authenticate", description = "APIs for authenticate")
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
@@ -24,24 +28,24 @@ public class AuthController {
 
     @Value("${custom.jwt.refresh-token.validity-in-seconds}")
     Long validityInSeconds;
-//    @GetMapping("/auth")
-//    public ResponseEntity<ApiResponse<String>> createAuth(){
-//        return  ApiResponse.created(jwtConfig.JwtCreateAccessToken());
-//    }
+    //    @GetMapping("/auth")
+    //    public ResponseEntity<ApiResponse<String>> createAuth(){
+    //        return  ApiResponse.created(jwtConfig.JwtCreateAccessToken());
+    //    }
 
     @PostMapping("/auth/login")
     public ResponseEntity<ApiResponse<LoginResponseDTO>> createAuth(@Valid @RequestBody LoginRequestDTO dto) {
         LoginResponseDTO loginResponseDTO = authService.login(dto);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", loginResponseDTO.getRefreshToken())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(validityInSeconds)
-                .build();
+                                              .httpOnly(true)
+                                              .secure(true)
+                                              .path("/")
+                                              .maxAge(validityInSeconds)
+                                              .build();
         ApiResponse<LoginResponseDTO> res = new ApiResponse<>(HttpStatus.OK, "", loginResponseDTO, "");
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(res);
+                             .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                             .body(res);
     }
 
     @PostMapping("/auth/refresh")
@@ -53,17 +57,17 @@ public class AuthController {
     public ResponseEntity<ApiResponse<ExchangeTokenResponseDTO>> refreshTokenWithCookie(@CookieValue(required = false) String refreshToken) {
         ExchangeTokenResponseDTO dto = authService.exchangeToken(refreshToken);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", dto.getRefreshToken())
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(validityInSeconds)
-                .build();
+                                              .httpOnly(true)
+                                              .secure(true)
+                                              .path("/")
+                                              .maxAge(validityInSeconds)
+                                              .build();
 
         ApiResponse<ExchangeTokenResponseDTO> res = new ApiResponse<>(HttpStatus.OK, "", dto, "");
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(res);
+                             .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                             .body(res);
     }
 
     @GetMapping("/auth/account")
@@ -75,14 +79,20 @@ public class AuthController {
     public ResponseEntity<String> logout(@CookieValue(required = false) String refreshToken) {
         authService.logout(refreshToken);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .build();
+                                              .httpOnly(true)
+                                              .secure(true)
+                                              .path("/")
+                                              .maxAge(0)
+                                              .build();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body("ok");
+                             .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                             .body("ok");
+    }
+
+    @PostMapping("/auth/register")
+    public ResponseEntity<?> registerNewUser(@Valid @RequestBody RegisterRequestDTO user) {
+        authService.createNewUser(user);
+        return ApiResponse.success("ok");
     }
 }
