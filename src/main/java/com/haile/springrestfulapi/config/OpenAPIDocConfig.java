@@ -53,8 +53,7 @@ public class OpenAPIDocConfig {
 
         return new OpenAPI().info(createApiInfo())
                             .servers(List.of(createServer("http://localhost:8080", "Development"),
-                                             createServer("https://uat.example.com", "Testing"),
-                                             createServer("https://production.example.com", "Production")))
+                                             createServer("https://spring.cyberpond.online", "Production")))
                             .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                             .components(new Components().addSecuritySchemes(securitySchemeName, createBearerScheme()));
     }
