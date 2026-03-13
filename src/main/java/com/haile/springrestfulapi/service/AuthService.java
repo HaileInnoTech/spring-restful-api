@@ -90,7 +90,7 @@ public class AuthService {
 
     public void createNewUser(RegisterRequestDTO user) {
         Boolean emailExists = userRepository.existsByEmail(user.getEmail());
-        if (!emailExists) {
+        if (emailExists) {
             throw new ResourceNotFoundException("Email already exists. Please try again");
         }
 
