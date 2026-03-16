@@ -43,3 +43,4 @@ application-prod.yaml
 !application.yaml.example
 !application-dev.yaml.example
 !application-prod.yaml.example
+.env

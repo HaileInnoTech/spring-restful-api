@@ -12,18 +12,22 @@ import com.haile.springrestfulapi.helper.exception.ResourceNotFoundException;
 import com.haile.springrestfulapi.repository.RoleRepository;
 import com.haile.springrestfulapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -35,6 +39,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
     public LoginResponseDTO login(LoginRequestDTO dto) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(dto.getEmail(),
@@ -61,6 +66,37 @@ public class AuthService {
                                .build();
     }
 
+    public LoginResponseDTO oauthLogin(String email) {
+
+        UserEntity user = userService.findUserByEmail(email);
+
+        RoleEntity role = roleRepository.findById(user.getRole()
+                                                      .getId())
+                                        .orElseThrow(() -> new ResourceNotFoundException("KO tim2 dc role"));
+        log.info("user: {}", user);
+        log.info("role: {}", role);
+
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
+
+        String accessToken = jwtService.jwtCreateAccessToken(authentication, user.getId());
+
+        String refreshToken = jwtService.createRefreshToken(user);
+
+        String scope = authorities.stream()
+                                  .map(GrantedAuthority::getAuthority)
+                                  .collect(Collectors.joining(" "));
+
+        return LoginResponseDTO.builder()
+                               .accessToken(accessToken)
+                               .refreshToken(refreshToken)
+                               .user(new LoginResponseDTO.OutputUser(user.getId(), email, scope))
+                               .build();
+    }
+
+    ;
+
     public ExchangeTokenResponseDTO exchangeToken(String token) {
         return jwtService.handleExchangeToken(token);
     }
@@ -72,7 +108,8 @@ public class AuthService {
         Jwt jwt = (Jwt) authentication.getPrincipal();
         String userId = jwt.getClaimAsString("id");
         String email = jwt.getSubject();
-        String role = jwt.getClaimAsString("role");
+        String role = jwt.getClaimAsString("scope")
+                         .replace("ROLE_", "");
 
         LoginResponseDTO.OutputUser outputUser = LoginResponseDTO.OutputUser.builder()
                                                                             .id(Long.parseLong(userId))

@@ -13,9 +13,13 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -79,6 +83,11 @@ public class SecurityConfig {
         return new CustomUserDetailsService(userService);
     }
 
+    @Bean
+    CustomOAuth2UserService oauth2UserService(UserService userService) {
+        return new CustomOAuth2UserService(userService);
+    }
+
     // ghi đè bean daoAuthenticationProvider, và hàm so sánh password bằng passwordEncoder
     @Bean
     AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
@@ -91,29 +100,34 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http,
                                                    CustomAccessDeniedHandler customAccessDeniedHandler,
-                                                   CustomAuthenticationEntryPoint customAuthenticationEntryPoint)
-            throws Exception {
-        final String[] WHITE_LISTS = {"/auth/login", "/auth/refresh", "/auth/refresh-with-cookie", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/auth/register"};
+                                                   CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+                                                   CustomOAuth2UserService customOAuth2UserService,
+                                                   OAuth2SuccessHandler oAuth2SuccessHandler) throws Exception {
+
+        final String[] WHITE_LISTS = {"/auth/login", "/auth/register", "/auth/refresh", "/auth/refresh-with-cookie", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/oauth2/**"};
+
         http.csrf(c -> c.disable());
 
         http.formLogin(form -> form.disable());
 
-        http.sessionManagement(s -> s.disable());
-
+        http.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
         http.authorizeHttpRequests(requests -> requests.requestMatchers(WHITE_LISTS)
                                                        .permitAll()
                                                        .requestMatchers("/users/**")
                                                        .hasRole("user")
                                                        .anyRequest()
-                                                       .authenticated()
+                                                       .authenticated());
 
-                                  );
+        // Google login
+        http.oauth2Login(oauth -> oauth.userInfoEndpoint(user -> user.userService(customOAuth2UserService))
+                                       .successHandler(oAuth2SuccessHandler));
 
-        http.oauth2ResourceServer(oauth2 -> oauth2.accessDeniedHandler(customAccessDeniedHandler)
-                                                  .authenticationEntryPoint(customAuthenticationEntryPoint)
+
+        // JWT verify
+        http.oauth2ResourceServer(oauth2 -> oauth2.authenticationEntryPoint(customAuthenticationEntryPoint)
+                                                  .accessDeniedHandler(customAccessDeniedHandler)
                                                   .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
-
 
         return http.build();
     }
