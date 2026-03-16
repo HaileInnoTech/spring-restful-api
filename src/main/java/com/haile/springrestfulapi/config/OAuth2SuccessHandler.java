@@ -47,6 +47,18 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                                               .build();
         // need to fix
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        response.sendRedirect("http://localhost:3000/oauth-success?accesstoken=" + loginResponseDTO.getAccessToken());
+        String scheme = request.getScheme();        // http / https
+        String host = request.getServerName();      // domain
+        int port = request.getServerPort();         // port
+
+        String baseUrl;
+
+        if (port == 80 || port == 443) {
+            baseUrl = scheme + "://" + host;
+        } else {
+            baseUrl = scheme + "://" + host + ":" + port;
+        }
+
+        response.sendRedirect(baseUrl + "/oauth-success?accesstoken=" + loginResponseDTO.getAccessToken());
     }
 }

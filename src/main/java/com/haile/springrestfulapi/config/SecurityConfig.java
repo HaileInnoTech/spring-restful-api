@@ -121,7 +121,12 @@ public class SecurityConfig {
 
         // Google login
         http.oauth2Login(oauth -> oauth.userInfoEndpoint(user -> user.userService(customOAuth2UserService))
-                                       .successHandler(oAuth2SuccessHandler));
+                                       .successHandler(oAuth2SuccessHandler)
+                                       .failureHandler((request, response, exception) -> {
+                                           response.setStatus(401);
+                                           response.getWriter()
+                                                   .write("OAuth2 login failed");
+                                       }));
 
 
         // JWT verify
