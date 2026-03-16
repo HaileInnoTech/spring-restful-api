@@ -12,6 +12,7 @@ import com.haile.springrestfulapi.repository.RoleRepository;
 import com.haile.springrestfulapi.repository.UserRepository;
 import com.haile.springrestfulapi.service.specification.UserSpecification;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.management.relation.Role;
 import java.util.List;
 
 @Service
@@ -79,6 +81,28 @@ public class UserService {
         newUser.setRole(roleEntity);
 
         return convertToUserResponseDTO(userRepository.save(newUser));
+    }
+
+    public UserEntity findOrCreateNewUser(String email) {
+
+        return userRepository.findByEmail(email)
+                             .orElseGet(() -> {
+
+                                 String hashedPassword = passwordEncoder.encode("123456");
+
+                                 RoleEntity userRole = roleRepository.findAllByIdOrName(null, "user")
+                                                                     .orElseThrow(() -> new ResourceNotFoundException(
+                                                                             "Role not found"));
+
+                                 UserEntity newUser = UserEntity.builder()
+                                                                .email(email)
+                                                                .username(email)
+                                                                .password(hashedPassword)
+                                                                .role(userRole)
+                                                                .build();
+
+                                 return userRepository.save(newUser);
+                             });
     }
 
     // Không phân trang
