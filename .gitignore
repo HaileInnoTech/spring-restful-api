@@ -44,3 +44,5 @@ application-prod.yaml
 !application-dev.yaml.example
 !application-prod.yaml.example
 .env
+spring-restful-api-error.log
+spring-restful-api.log
